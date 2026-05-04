@@ -65,4 +65,3 @@ jobs:
           MY_SECRET_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
           echo "Deploying to production..."
-          ./deploy.sh
