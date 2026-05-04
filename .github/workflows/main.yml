@@ -11,17 +11,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
+          
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          
       - name: Build artifact
         run: echo "Build successful" > build_info.txt
-      - name: Upload artifact
+        
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-data
@@ -40,13 +50,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run tests
-        run: echo "Running tests..."
+        run: pytest 
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
+      - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: build-data
@@ -54,4 +64,5 @@ jobs:
         env:
           MY_SECRET_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
-          echo "Deploying..."
+          echo "Deploying to production..."
+          ./deploy.sh
